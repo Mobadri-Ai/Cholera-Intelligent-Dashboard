@@ -2,69 +2,79 @@ import streamlit as st
 from streamlit_folium import st_folium
 import folium
 
-# ----- Page Config -----
-st.set_page_config(page_title="Health Monitoring Dashboard", layout="wide")
+# ========== Settings ==========
+st.set_page_config(page_title="Cholera Dashboard", layout="wide")
 
-# ----- Dark Mode Toggle -----
+# ========== Dark Mode ==========
 if "dark_mode" not in st.session_state:
     st.session_state.dark_mode = False
 
-def toggle_dark():
+def toggle_dark_mode():
     st.session_state.dark_mode = not st.session_state.dark_mode
 
-# ----- CSS -----
 dark_bg = "#0e1117"
-light_bg = "#f4f6fa"
+light_bg = "#f8f9fc"
 
+# ========== Style ==========
 st.markdown(f"""
 <style>
 body {{
-    background-color: {'#0e1117' if st.session_state.dark_mode else '#f4f6fa'};
+    background-color: {'#0e1117' if st.session_state.dark_mode else '#f8f9fc'} !important;
 }}
-.app-container {{
-    background: rgba(255,255,255,0.15);
-    backdrop-filter: blur(10px);
-    padding: 20px;
-    border-radius: 20px;
-    margin-top: 10px;
+
+.navbar {{
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    background: {'#111827' if st.session_state.dark_mode else '#ffffff'};
+    border-radius: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }}
+
+.title {{
+    font-size: 20px;
+    font-weight: 700;
+    color: {'#ffffff' if st.session_state.dark_mode else '#000000'};
+}}
+
 .map-container {{
-    height: 350px !important;
+    height: 330px;
+    border-radius: 12px;
+    overflow: hidden;
 }}
+
 @media (max-width: 768px) {{
     .map-container {{
-        height: 250px !important;
+        height: 230px;
     }}
 }}
 </style>
 """, unsafe_allow_html=True)
 
-# ----- Header -----
-st.markdown(
-    "<h2 style='text-align:center; font-weight:700;'>Disease Monitoring Dashboard</h2>",
-    unsafe_allow_html=True
-)
-
-st.button("🌙 Toggle Dark Mode", on_click=toggle_dark)
-
-# ----- Main Card -----
-st.markdown("<div class='app-container'>", unsafe_allow_html=True)
-
-st.write("### 🗺️ Real-Time Disease Spread Map")
-
-# ----- Map -----
-m = folium.Map(location=[15.5007, 32.5599], zoom_start=6)
-folium.Marker([15.5, 32.55], popup="Sample Location").add_to(m)
-
-st_map = st_folium(m, width="100%", height=350)
-
-# ----- Power BI Section -----
-st.write("### 📊 Analytics Dashboard (Power BI)")
+# ========== Navbar ==========
 st.markdown("""
-<iframe title="PowerBI Dashboard"
-width="100%" height="500"
+<div class='navbar'>
+    <div class='title'>🌍 Cholera Monitoring Dashboard</div>
+</div>
+""", unsafe_allow_html=True)
+
+st.button("🌙 Toggle Dark Mode", on_click=toggle_dark_mode)
+
+# ========== MAP ==========
+st.subheader("🗺️ Real-Time Disease Map")
+
+map_center = [15.50, 32.55]
+m = folium.Map(location=map_center, zoom_start=6)
+folium.Marker(map_center, popup="Sample Case").add_to(m)
+
+st_folium(m, width="100%", height=330, returned_objects=[])
+
+# ========== Power BI ==========
+st.subheader("📊 Analytics Dashboard (Power BI)")
+
+st.markdown("""
+<iframe title="pbi" width="100%" height="550"
 src="YOUR_POWER_BI_IFRAME_LINK"
 frameborder="0" allowFullScreen="true"></iframe>
 """, unsafe_allow_html=True)
-
-st.markdown("</div>", unsafe_allow_html=True)
