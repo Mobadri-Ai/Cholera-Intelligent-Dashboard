@@ -231,6 +231,12 @@ def apply_custom_styles():
             font-weight: bold;
             margin: 0;
         }}
+
+        /* تباعد الأزرار في الشريط العلوي */
+        div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlock"] > div:nth-child(2) .stButton,
+        div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlock"] > div:nth-child(3) .stButton {{
+            margin-top: 25px; /* لضبط المحاذاة العمودية مع العنوان */
+        }}
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
@@ -244,6 +250,7 @@ def toggle_dark_mode():
 
 def toggle_language():
     st.session_state.language = 'en' if st.session_state.language == 'ar' else 'ar'
+    st.rerun()
 
 def get_risk_status():
     """يحدد مستوى الخطر بناءً على عدد الحالات (محاكاة لنظام EWS)."""
@@ -279,29 +286,9 @@ def add_new_case(location, lat, lon, case_type):
 # --- 5. واجهة المستخدم (UI Components) ---
 
 def sidebar_controls():
-    """إنشاء الأزرار الجانبية لاختيار اللغة ومستوى الإنذار."""
+    """إنشاء الأزرار الجانبية لاختيار المنطقة ومستوى الإنذار."""
     with st.sidebar:
-        # زر تبديل الوضع الليلي/النهاري
-        st.markdown(
-            f"""
-            <button class="mode-toggle-btn" onclick="document.querySelector('.stApp').__streamlit_element.instance.toggle_dark_mode()">
-                {'☀️' if st.session_state.dark_mode else '🌙'} {_('mode_switch_light') if st.session_state.dark_mode else _('mode_switch')}
-            </button>
-            """,
-            unsafe_allow_html=True
-        )
-        # هذا الزر يحتاج إلى ضغط لتحديث الحالة، سنستخدم زر Streamlit العادي
-        if st.button(f"{'☀️' if st.session_state.dark_mode else '🌙'} {_('mode_switch_light') if st.session_state.dark_mode else _('mode_switch')}"):
-            toggle_dark_mode()
-
-        st.markdown("---")
-
-        # زر تبديل اللغة
-        if st.button(_('lang_switch')):
-            toggle_language()
-            st.rerun()
-
-        st.markdown("---")
+        # Note: Language and Mode toggles are moved to the top header.
         
         # اختيار المنطقة (محاكاة)
         st.selectbox(_('region_select'), ['الخرطوم', 'كسلا', 'بورتسودان', 'الفاشر'], index=0)
@@ -550,9 +537,45 @@ if __name__ == "__main__":
     # إعداد الشريط الجانبي (يجب أن يتم استدعاؤه قبل أي شيء في الـ main content)
     sidebar_controls()
 
-    # العنوان الرئيسي
-    st.title(_('title'))
-    st.markdown(f"## **{_('subtitle')}**")
+    # --- الشريط العلوي (Header) الجديد ---
+    # تقسيم الشريط العلوي: العنوان (كبير) والزراين (صغير)
+    header_col1, header_col2, header_col3 = st.columns([8, 1, 1], gap="small")
+
+    with header_col1:
+        # العنوان الرئيسي والفرعي
+        st.markdown(f"""
+            <div style="padding-top: 15px;">
+                <h1>{_('title')}</h1>
+                <p style="opacity: 0.7; margin-top: -10px;">{_('subtitle')}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+    with header_col2:
+        # زر تبديل اللغة (Language Switch)
+        # استخدام st.markdown مع ارتفاع مخصص لمحاذاة الزر عمودياً
+        st.markdown('<div style="height: 100%;">', unsafe_allow_html=True)
+        if st.button(_('lang_switch'), key="header_lang_switch"):
+            toggle_language()
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+
+    with header_col3:
+        # زر تبديل الوضع الليلي/النهاري (Dark/Light Mode)
+        mode_text = _('mode_switch_light') if st.session_state.dark_mode else _('mode_switch')
+        mode_icon = '☀️' if st.session_state.dark_mode else '🌙'
+        
+        st.markdown('<div style="height: 100%;">', unsafe_allow_html=True)
+        if st.button(f"{mode_icon} {mode_text}", key="header_mode_switch"):
+            toggle_dark_mode()
+            # لا نحتاج لـ rerun إذا كانت التغييرات تتم عبر CSS فقط، لكن لضمان تحديث Folium/Plotly نستخدمها
+            st.rerun() 
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # فاصل أفقي أنيق تحت الشريط العلوي
+    st.markdown("<hr style='border-top: 1px solid rgba(150, 150, 150, 0.2); margin-top: 0px; margin-bottom: 0px;'>", unsafe_allow_html=True)
+    # --- نهاية الشريط العلوي ---
+
     
     # نظام التبويبات الرئيسي
     tab_dashboard, tab_ews, tab_reporting = st.tabs([_('dashboard_tab'), _('ews_tab'), _('reporting_tab')])
