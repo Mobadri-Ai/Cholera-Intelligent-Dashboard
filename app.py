@@ -15,7 +15,8 @@ from datetime import datetime, timedelta
 st.set_page_config(
     page_title="CHOLERA Intelligent Dashboard (CID)",
     layout="wide",
-    initial_sidebar_state="expanded"
+    # تم تغيير الحالة الأولية إلى "collapsed" لإخفاء الشريط الجانبي عند التحميل
+    initial_sidebar_state="collapsed"
 )
 
 # --- محاكاة قاعدة بيانات Supabase (باستخدام Session State) ---
